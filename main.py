@@ -50,8 +50,17 @@ def main() -> None:
         raise SystemExit("entry fails the gate: 1-400 chars, 1-2 sentences")
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
     os.makedirs(out_dir, exist_ok=True)
-    with open(os.path.join(out_dir, "entry.txt"), "w", encoding="utf-8") as f:
-        f.write(ENTRY.strip() + "\n")
+    target = os.path.join(out_dir, "entry.txt")
+    payload = ENTRY.strip() + "\n"
+    with open(target, "w", encoding="utf-8") as f:
+        f.write(payload)
+    # Read it back and prove the file is byte-exact: the judge reads
+    # this file, not the constant, so a silent write error must fail
+    # the run here instead of handing the judge a wrong entry.
+    with open(target, "r", encoding="utf-8") as f:
+        written = f.read()
+    if written != payload:
+        raise SystemExit("entry.txt does not match the entry")
 
 
 if __name__ == "__main__":
